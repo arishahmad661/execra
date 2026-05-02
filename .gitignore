@@ -1,0 +1,16 @@
+# Binaries
+bin/
+
+# Go
+*.exe
+*.test
+*.out
+
+# Dependencies
+vendor/
+
+# Env
+.env
+
+# Mac
+.DS_Store

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package QueueService;
+
+option go_package = "github.com/arishahmad661/execra/internal/api/pb";
+
+service QueueService {
+  rpc Enqueue(EnqueueRequest) returns (EnqueueResponse);
+  rpc Dequeue(DequeueRequest) returns (DequeueResponse);
+  rpc Ack(AckRequest) returns (AckResponse);
+  rpc Nack(NackRequest) returns (NackResponse);
+  rpc Schedule(ScheduleRequest) returns (ScheduleResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message EnqueueRequest {
+  string queue = 1;
+  bytes payload = 2;
+  int32 max_retries = 3;
+}
+
+message EnqueueResponse {
+  string job_id = 1;
+}
+
+message DequeueRequest {
+  string queue = 1;
+  string worker_id = 2;
+  int32 max_jobs = 3;
+  int64 lease_duration = 4; 
+}
+
+message Job {
+  string job_id = 1;
+  bytes payload = 2;
+  string lease_id = 3;
+}
+
+message DequeueResponse {
+  repeated Job jobs = 1;
+}
+
+message AckRequest {
+  string job_id = 1;
+  string lease_id = 2;
+}
+
+message AckResponse {}
+
+message NackRequest {
+  string job_id = 1;
+  string lease_id = 2;
+  string error = 3;
+}
+
+message NackResponse {
+  bool isDlq = 1;
+  int32 attempt_count = 2;
+}
+
+message ScheduleRequest {
+  string queue = 1;
+  bytes payload = 2;
+  int32 max_retries = 3;
+  int64 execute_at = 4;
+}
+
+message ScheduleResponse {
+  string job_id = 1;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string node_id = 1;
+  bool is_leader = 2;
+  string status = 3;
+}
