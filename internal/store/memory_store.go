@@ -9,11 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type LeasedJob struct {
-	Job   *Job
-	Lease *Lease
-}
-
 type MemoryStore struct {
 	jobs     map[string]*Job
 	queues   map[string][]string
@@ -58,7 +53,7 @@ func (s *MemoryStore) Dequeue(ctx context.Context, queue string, workerId string
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.requeueExpired()
+	_ = s.RequeueExpired()
 
 	q, ok := s.queues[queue]
 	if !ok || len(q) == 0 {
@@ -151,7 +146,11 @@ func (s *MemoryStore) Schedule(ctx context.Context, queue string, payload []byte
 	return s.Enqueue(ctx, queue, payload, maxRetries)
 }
 
-func (s *MemoryStore) requeueExpired() {
+func (s *MemoryStore) Close() error {
+	return nil
+}
+
+func (s *MemoryStore) RequeueExpired() error {
 	now := time.Now().Unix()
 
 	for jobId, lease := range s.inFlight {
@@ -170,4 +169,6 @@ func (s *MemoryStore) requeueExpired() {
 			s.queues[job.Queue] = append(s.queues[job.Queue], jobId)
 		}
 	}
+
+	return nil
 }

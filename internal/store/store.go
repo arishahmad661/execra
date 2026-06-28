@@ -18,6 +18,7 @@ type Job struct {
 	MaxRetries   int32
 	AttemptCount int32
 	Status       JobStatus
+	RetryAfter   int64
 }
 
 type Lease struct {
@@ -27,10 +28,17 @@ type Lease struct {
 	Expiry   int64
 }
 
+type LeasedJob struct {
+	Job   *Job
+	Lease *Lease
+}
+
 type Store interface {
 	Enqueue(ctx context.Context, queue string, payload []byte, maxRetries int32) (string, error)
 	Dequeue(ctx context.Context, queue string, workerId string, maxJobs int32, leaseDuration int64) ([]LeasedJob, error)
 	Ack(ctx context.Context, jobId string, leaseId string) error
 	Nack(ctx context.Context, jobId string, leaseId string, errMsg string) (bool, int32, error)
 	Schedule(ctx context.Context, queue string, payload []byte, maxRetries int32, executeAt int64) (string, error)
+	Close() error
+	RequeueExpired() error
 }
