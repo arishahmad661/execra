@@ -20,6 +20,7 @@ import (
 
 func main() {
 	port := "50051"
+	prometheusPort := "9090"
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
@@ -45,11 +46,11 @@ func main() {
 	}()
 
 	go func() {
-		log.Println("Metrics server running on :9090")
+		log.Println(fmt.Sprintf("Metrics server running on :%s", prometheusPort))
 
 		http.Handle("/metrics", promhttp.Handler())
 
-		err := http.ListenAndServe(":9090", nil)
+		err := http.ListenAndServe(fmt.Sprintf(":%s", prometheusPort), nil)
 		log.Fatalf("metrics server failed: %v", err)
 	}()
 
